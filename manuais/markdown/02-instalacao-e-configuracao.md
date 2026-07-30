@@ -410,4 +410,4 @@ Dentro do Helix, abra um arquivo `.py` e teste:
 
 ## Próximo passo
 
-[03 — Filosofia Modal](./03-filosofia-modal.md) · [06 — Atalhos Essenciais](./06-atalhos-essenciais.md) · [08 — LSP e Inteligência](./08-lsp-e-inteligencia.md)
+[00 — Roadmap e Pré-requisitos](../markdown/00-roadmap.md) · [03 — Filosofia Modal](./03-filosofia-modal.md) · [Trilha interativa](../iterativo/02%20-%20Instalação%20e%20Configuração.html) · [06 — Atalhos Essenciais](./06-atalhos-essenciais.md) · [08 — LSP e Inteligência](./08-lsp-e-inteligencia.md)
