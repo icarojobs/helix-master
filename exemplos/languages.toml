@@ -1,0 +1,92 @@
+# Language servers e formatadores — stack full-stack
+# Copie para: ~/.config/helix/languages.toml
+# Verificar: hx --health <linguagem>
+
+# ── Python ──────────────────────────────────────────────────────────────────
+
+[language-server.pyright]
+command = "pyright-langserver"
+args = ["--stdio"]
+
+[[language]]
+name = "python"
+language-servers = ["pyright", "ruff"]
+auto-format = true
+formatter = { command = "ruff", args = ["format", "--stdin-filename", "%"], input = "pipe" }
+
+# ── SQL ─────────────────────────────────────────────────────────────────────
+
+[language-server.sqls]
+command = "sqls"
+config = { sqls = { connections = [
+  { driver = "postgresql", dataSourceName = "host=127.0.0.1 port=5432 user=SEU_USUARIO dbname=SEU_BANCO sslmode=disable" },
+  { driver = "mysql", dataSourceName = "SEU_USUARIO:@tcp(127.0.0.1:3306)/SEU_BANCO" },
+  { driver = "sqlite3", dataSourceName = "./dev.db" },
+] } }
+
+[[language]]
+name = "sql"
+language-servers = ["sqls"]
+auto-format = false
+
+# ── PHP ─────────────────────────────────────────────────────────────────────
+
+[[language]]
+name = "php"
+auto-format = true
+
+# ── Go ──────────────────────────────────────────────────────────────────────
+
+[[language]]
+name = "go"
+auto-format = true
+
+# ── Rust ────────────────────────────────────────────────────────────────────
+
+[[language]]
+name = "rust"
+auto-format = true
+
+# ── Web (JS/TS/React) ───────────────────────────────────────────────────────
+
+[[language]]
+name = "javascript"
+auto-format = true
+
+[[language]]
+name = "typescript"
+auto-format = true
+
+[[language]]
+name = "tsx"
+auto-format = true
+
+[[language]]
+name = "jsx"
+auto-format = true
+
+[[language]]
+name = "html"
+auto-format = true
+
+[[language]]
+name = "css"
+auto-format = true
+
+[[language]]
+name = "json"
+auto-format = true
+
+# ── Infra / config ──────────────────────────────────────────────────────────
+
+[[language]]
+name = "yaml"
+auto-format = true
+
+[[language]]
+name = "toml"
+auto-format = true
+
+[[language]]
+name = "markdown"
+auto-format = false

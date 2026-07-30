@@ -1,6 +1,6 @@
 # Helix Master
 
-Documentação completa em **português do Brasil** para domínio total do [Helix Editor](https://helix-editor.com/), com guias de terminal, sessões persistentes (tmux) e configuração de LSP para desenvolvimento full-stack.
+Documentação completa em **português do Brasil** para domínio total do [Helix Editor](https://helix-editor.com/), com guias de instalação (Linux e macOS), atalhos, LSP, terminal e sessões persistentes (tmux).
 
 ## Conteúdo
 
@@ -8,21 +8,39 @@ Todos os manuais estão em [`manuais/`](./manuais/README.md).
 
 | # | Manual | Tópico |
 |---|--------|--------|
-| 01–16 | Fundamentos → Referência | Modos, atalhos, LSP, busca, splits, config |
-| **17** | [Terminal e Sessões Persistentes](./manuais/17-terminal-e-sessoes-persistentes.md) | Terminal no Linux, tmux, sobrevivência a reboot |
+| **02** | [Instalação e Configuração](./manuais/02-instalacao-e-configuracao.md) | **Debian/macOS, LSPs, atalhos, configs** |
+| 01–16 | Fundamentos → Referência | Modos, atalhos, LSP, busca, splits |
+| **17** | [Terminal e Sessões Persistentes](./manuais/17-terminal-e-sessoes-persistentes.md) | tmux, sobrevivência a reboot |
 
-## Início rápido
+## Setup rápido
 
 ```bash
-# Instalar Helix (Ubuntu/Pop!_OS)
-sudo snap install helix --classic
+# Instalar Helix
+sudo snap install helix --classic    # Linux (Debian/Ubuntu/Pop!_OS)
+brew install helix                   # macOS
 
-# Abrir editor
-hx .
+# Instalar language servers
+bash exemplos/install-lsps-linux.sh  # Linux
+bash exemplos/install-lsps-macos.sh  # macOS
 
-# Verificar LSP
+# Copiar configuração (atalhos + LSP)
+mkdir -p ~/.config/helix
+cp exemplos/config.toml ~/.config/helix/
+cp exemplos/languages.toml ~/.config/helix/
+
+# Verificar
 hx --health python
+hx .
 ```
+
+## Arquivos de exemplo
+
+| Arquivo | Conteúdo |
+|---------|----------|
+| [`exemplos/config.toml`](./exemplos/config.toml) | Tema, editor, **todos os atalhos** |
+| [`exemplos/languages.toml`](./exemplos/languages.toml) | **Todos os LSPs** da stack full-stack |
+| [`exemplos/install-lsps-linux.sh`](./exemplos/install-lsps-linux.sh) | Script de instalação LSP (Linux) |
+| [`exemplos/install-lsps-macos.sh`](./exemplos/install-lsps-macos.sh) | Script de instalação LSP (macOS) |
 
 ## Stack coberta
 

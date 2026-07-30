@@ -7,11 +7,11 @@ Documentação completa em **português do Brasil** para domínio total do [Heli
 | # | Manual | Conteúdo |
 |---|--------|----------|
 | 01 | [Introdução](./01-introducao.md) | O que é o Helix, filosofia, comparação com Vim/Neovim |
-| 02 | [Instalação e Configuração](./02-instalacao-e-configuracao.md) | Setup desta máquina, LSPs, arquivos de config |
+| 02 | [Instalação e Configuração](./02-instalacao-e-configuracao.md) | Instalação Debian/macOS, LSPs, atalhos, configs |
 | 03 | [Filosofia Modal](./03-filosofia-modal.md) | Modos (normal, insert, select), paradigma Kakoune |
 | 04 | [Movimentação e Navegação](./04-movimentacao-e-navegacao.md) | Movimentos, jumplist, scroll, goto |
 | 05 | [Edição e Seleções](./05-edicao-e-selecoes.md) | Modelo de seleção, yank/paste, surround, textobjects |
-| 06 | [Atalhos Essenciais](./06-atalhos-essenciais.md) | Tabela completa dos atalhos mais usados |
+| 06 | [Atalhos Essenciais](./06-atalhos-essenciais.md) | Tabela completa + como configurar keymaps |
 | 07 | [Modo Goto e Space](./07-modo-goto-e-espaco.md) | Sub-modos `g`, `Space`, LSP rápido |
 | 08 | [LSP e Inteligência](./08-lsp-e-inteligencia.md) | Autocomplete, diagnósticos, rename, code actions |
 | 09 | [Busca e Substituição](./09-busca-e-substituicao.md) | Busca local, global, regex, substituição |
@@ -40,14 +40,31 @@ hx --health python
 :config-reload
 ```
 
-## Arquivos de configuração nesta máquina
+## Arquivos de configuração
 
 | Arquivo | Caminho |
 |---------|---------|
 | Config principal | `~/.config/helix/config.toml` |
 | Language servers | `~/.config/helix/languages.toml` |
 | Config por projeto | `.helix/config.toml` e `.helix/languages.toml` |
+| **Exemplos prontos** | [`exemplos/`](../exemplos/) neste repositório |
 
-## Versão instalada
+## Setup rápido
 
-Helix **25.07.1** via Snap (classic).
+```bash
+# 1. Instalar Helix
+sudo snap install helix --classic          # Linux
+brew install helix                         # macOS
+
+# 2. Instalar LSPs
+bash exemplos/install-lsps-linux.sh        # Linux
+bash exemplos/install-lsps-macos.sh        # macOS
+
+# 3. Copiar configs
+mkdir -p ~/.config/helix
+cp exemplos/config.toml ~/.config/helix/
+cp exemplos/languages.toml ~/.config/helix/
+
+# 4. Verificar
+hx --health python
+```

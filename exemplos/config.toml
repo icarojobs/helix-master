@@ -1,0 +1,88 @@
+# Configuração Helix — setup recomendado
+# Copie para: ~/.config/helix/config.toml
+# Recarregar: :config-reload  |  pkill -USR1 hx
+
+theme = "catppuccin_mocha"
+true-color = true
+
+[editor]
+line-number = "relative"
+cursorline = true
+cursorline-minimap = true
+color-modes = true
+auto-save = true
+auto-format = true
+mouse = true
+middle-click-paste = true
+scrolloff = 8
+tab-width = 4
+soft-wrap.enable = true
+soft-wrap.indicator = "↪"
+completion-trigger-len = 2
+gutters = ["diagnostics", "spacer", "line-numbers", "spacer", "diff", "spacer"]
+
+[editor.indent-guides]
+render = true
+character = "│"
+skip-levels = 1
+
+[editor.cursor-shape]
+insert = "bar"
+normal = "block"
+select = "underline"
+
+[editor.statusline]
+left = ["mode", "spinner", "file-name", "read-only-indicator", "file-modification-indicator"]
+center = ["workspace-diagnostics"]
+right = ["diagnostic", "selections", "register", "position", "file-encoding", "file-line-ending", "file-type"]
+
+[editor.lsp]
+display-messages = true
+display-inlay-hints = true
+auto-signature-help = true
+snippet = true
+
+[editor.lsp.request]
+timeout = 30
+
+[editor.file-picker]
+hidden = false
+follow-symlinks = true
+deduplicate-links = true
+
+[editor.file-search]
+ignore = [".git", "node_modules", "vendor", "target", "__pycache__", ".venv", "dist", "build"]
+
+[editor.whitespace]
+render = "all"
+render.space = "·"
+render.tab = "→"
+render.newline = "⏎"
+
+# ── Atalhos personalizados ───────────────────────────────────────────────────
+
+[keys.normal]
+# Salvar / sair
+C-s = ":w"
+C-S = ":wq"
+C-q = ":q"
+
+# Navegação entre splits (estilo Vim)
+C-h = "jump_view_left"
+C-j = "jump_view_down"
+C-k = "jump_view_up"
+C-l = "jump_view_right"
+
+# Diagnósticos LSP
+"{" = "goto_prev_diag"
+"}" = "goto_next_diag"
+
+# Formatação e seleção
+F = ":format"
+S = "extend_to_line_bounds"
+
+[keys.insert]
+C-s = [":w", "normal_mode"]
+
+[keys.select]
+C-s = ":w"

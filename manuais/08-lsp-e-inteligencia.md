@@ -1,5 +1,7 @@
 # 08 — LSP e Inteligência
 
+> **Setup completo:** se ainda não instalou os language servers e o `languages.toml`, siga [02 — Instalação e Configuração](./02-instalacao-e-configuracao.md) (Partes 3 e 6) e use os arquivos em [`exemplos/`](../exemplos/).
+
 ## O que é LSP?
 
 O **Language Server Protocol** permite que o editor se comunique com servidores de linguagem que fornecem:
