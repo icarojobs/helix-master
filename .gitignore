@@ -1,0 +1,22 @@
+# Sistema
+.DS_Store
+Thumbs.db
+*~
+
+# Segredos — nunca versionar
+.env
+.env.*
+*.pem
+*.key
+id_rsa
+id_ed25519
+credentials.json
+secrets.toml
+
+# Config local com dados sensíveis (exemplos genéricos ficam nos manuais)
+config.local.toml
+languages.local.toml
+
+# Editor
+*.swp
+*.swo
