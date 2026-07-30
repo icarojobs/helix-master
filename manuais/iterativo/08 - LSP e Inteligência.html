@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula 08 — LSP e Inteligência | Helix Master</title>
+<style>
+  /* ============ TEMA (mude só --accent conforme o módulo) ============ */
+  :root{
+    --bg:#07090f; --bg2:#0d1220; --panel:#0e1424; --line:#1c2740;
+    --accent:#bd93f9;            /* SUBSTITUA pela cor do módulo */
+    --accent2:#00d9ff;
+    --text:#e6edf3; --muted:#8b98a9;
+    --mono:'JetBrains Mono','Fira Code','Cascadia Code',Consolas,'Courier New',monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{background:var(--bg);color:var(--text);font-family:var(--mono);overflow:hidden}
+
+  /* grade de fundo + scanlines (vibe CRT) */
+  body::before{content:"";position:fixed;inset:0;z-index:1;pointer-events:none;
+    background:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
+               linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+    background-size:44px 44px}
+  body::after{content:"";position:fixed;inset:0;z-index:40;pointer-events:none;
+    background:repeating-linear-gradient(0deg,rgba(0,0,0,.14) 0 2px,transparent 2px 4px);opacity:.3}
+  #matrix{position:fixed;inset:0;z-index:0;opacity:.13}
+
+  /* ============ SLIDES ============ */
+  #deck{position:fixed;inset:0;z-index:10}
+  .slide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    padding:4vh 4vw;opacity:0;visibility:hidden;transform:translateX(4vw) scale(.985);
+    transition:opacity .45s ease,transform .45s ease,visibility .45s}
+  .slide.active{opacity:1;visibility:visible;transform:none}
+  .wrap{width:min(88vw,1560px);max-height:88vh}
+
+  /* entrada em cascata dos elementos .reveal */
+  .reveal{opacity:0;transform:translateY(22px)}
+  .slide.active .reveal{animation:rise .55s cubic-bezier(.2,.7,.3,1) forwards;
+    animation-delay:calc(var(--i,0)*.12s + .15s)}
+  @keyframes rise{to{opacity:1;transform:none}}
+
+  /* ============ TIPOGRAFIA ============ */
+  .kicker{color:var(--accent);letter-spacing:.35em;text-transform:uppercase;
+    font-size:clamp(.8rem,1vw,1.1rem);margin-bottom:2.2vh}
+  h1{font-size:clamp(2.6rem,4.6vw,5.2rem);line-height:1.08;
+    text-shadow:0 0 22px color-mix(in srgb,var(--accent) 45%,transparent)}
+  h1 .hl,h2 .hl{color:var(--accent)}
+  h2{font-size:clamp(1.9rem,3vw,3.4rem);margin-bottom:3.5vh;
+    display:flex;align-items:center;gap:.5em}
+  h2::before{content:"$";color:var(--accent);text-shadow:0 0 14px var(--accent)}
+  .subtitle{color:var(--muted);font-size:clamp(1.1rem,1.5vw,1.7rem);margin-top:2vh}
+  p,li{font-size:clamp(1.05rem,1.35vw,1.55rem);line-height:1.65}
+  .muted{color:var(--muted)}
+  .hint{position:absolute;bottom:9vh;left:50%;transform:translateX(-50%);
+    color:var(--muted);font-size:clamp(.85rem,.95vw,1.05rem);animation:pulse 2s infinite}
+  @keyframes pulse{50%{opacity:.35}}
+
+  /* cursor de digitação */
+  .type.typing::after{content:"▌";color:var(--accent);animation:blink .8s step-end infinite}
+  @keyframes blink{50%{opacity:0}}
+
+  /* ============ COMPONENTES ============ */
+  ul.list{list-style:none;display:grid;gap:2vh}
+  ul.list li{padding-left:1.6em;position:relative}
+  ul.list li::before{content:"▸";position:absolute;left:0;color:var(--accent);
+    text-shadow:0 0 10px var(--accent)}
+
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:2.5vw;align-items:start}
+
+  /* janela de terminal */
+  .term{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    box-shadow:0 0 34px color-mix(in srgb,var(--accent) 14%,transparent),0 18px 50px rgba(0,0,0,.5);
+    overflow:hidden}
+  .term-bar{display:flex;align-items:center;gap:.5em;padding:.65em 1em;
+    background:var(--bg2);border-bottom:1px solid var(--line);
+    color:var(--muted);font-size:clamp(.8rem,.9vw,1rem)}
+  .term-bar i{width:.85em;height:.85em;border-radius:50%;display:inline-block}
+  .term-bar i:nth-child(1){background:#ff5f57}.term-bar i:nth-child(2){background:#febc2e}
+  .term-bar i:nth-child(3){background:#28c840}
+  .term-bar span{margin-left:.6em}
+  .term pre{padding:1.2em 1.4em;overflow:auto;max-height:56vh;
+    font-size:clamp(.95rem,1.15vw,1.4rem);line-height:1.6}
+  .term code .cm{color:var(--muted)}           /* comentários */
+  .term code .st{color:var(--accent2)}         /* strings */
+  .term code .kw{color:var(--accent)}          /* palavras-chave / sintaxe md */
+
+  code.inline{background:var(--panel);border:1px solid var(--line);border-radius:6px;
+    padding:.12em .45em;color:var(--accent)}
+  .kbd{background:var(--bg2);border:1px solid var(--line);border-bottom-width:3px;
+    border-radius:6px;padding:.1em .5em;font-size:.9em}
+
+  .tip{border:1px solid color-mix(in srgb,var(--accent) 45%,transparent);
+    border-left:4px solid var(--accent);border-radius:10px;background:var(--panel);
+    padding:1em 1.3em;margin-top:2.5vh;
+    box-shadow:0 0 24px color-mix(in srgb,var(--accent) 10%,transparent)}
+  .tip b{color:var(--accent)}
+
+  table{border-collapse:collapse;width:100%;font-size:clamp(.95rem,1.2vw,1.45rem)}
+  th,td{border:1px solid var(--line);padding:.55em .9em;text-align:left}
+  th{background:var(--bg2);color:var(--accent)}
+  tr:nth-child(even) td{background:color-mix(in srgb,var(--panel) 60%,transparent)}
+
+  blockquote{border-left:4px solid var(--accent);padding:.4em 1.2em;color:var(--muted);
+    font-style:italic;font-size:clamp(1.1rem,1.5vw,1.7rem)}
+
+  .mermaid{display:flex;justify-content:center;background:var(--panel);
+    border:1px solid var(--line);border-radius:12px;padding:1.2em;max-height:62vh;overflow:auto;
+    font-size:clamp(.85rem,1vw,1.2rem);color:var(--accent2)}
+  .mermaid svg{max-width:100%;height:auto}
+
+  .badge{display:inline-block;border:1px solid var(--accent);color:var(--accent);
+    border-radius:999px;padding:.2em .9em;font-size:clamp(.8rem,.95vw,1.05rem);
+    letter-spacing:.15em;text-transform:uppercase;margin-bottom:2vh}
+
+  /* slide final (créditos) */
+  .contact{display:grid;gap:1.6vh;margin-top:3vh}
+  .contact a{color:var(--accent2);text-decoration:none;border-bottom:1px dashed var(--line)}
+  .contact a:hover{text-shadow:0 0 12px var(--accent2)}
+
+  /* ============ NAVEGAÇÃO (estilo PowerPoint) ============ */
+  .controls{position:fixed;right:2.2vw;bottom:3.5vh;z-index:50;display:flex;
+    align-items:center;gap:.55em;background:color-mix(in srgb,var(--bg2) 82%,transparent);
+    border:1px solid var(--line);border-radius:999px;padding:.45em .8em;
+    backdrop-filter:blur(8px);box-shadow:0 8px 30px rgba(0,0,0,.45)}
+  .controls button{background:transparent;border:1px solid var(--line);color:var(--text);
+    font-family:var(--mono);font-size:clamp(1rem,1.1vw,1.3rem);width:2.3em;height:2.3em;
+    border-radius:50%;cursor:pointer;transition:.2s}
+  .controls button:hover{border-color:var(--accent);color:var(--accent);
+    box-shadow:0 0 16px color-mix(in srgb,var(--accent) 40%,transparent)}
+  #counter{color:var(--muted);font-size:clamp(.9rem,1vw,1.15rem);min-width:4.5em;text-align:center}
+
+  .progress{position:fixed;top:0;left:0;right:0;height:4px;z-index:50;background:var(--bg2)}
+  #bar{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));
+    box-shadow:0 0 12px var(--accent);transition:width .4s ease}
+
+  .brand{position:fixed;left:2.2vw;bottom:3.5vh;z-index:50;color:var(--muted);
+    font-size:clamp(.8rem,.9vw,1rem);letter-spacing:.08em}
+  .brand b{color:var(--accent)}
+</style>
+</head>
+<body>
+<canvas id="matrix"></canvas>
+
+<main id="deck">
+
+
+  <section class="slide">
+    <div class="wrap" style="text-align:center">
+      <p class="kicker reveal">Helix Master</p>
+      <h1 class="type">Aula 08 — LSP e Inteligência</h1>
+      <p class="subtitle reveal">Autocomplete, diagnósticos, rename e code actions.</p>
+    </div>
+    <p class="hint">Use ← → ou espaço para navegar · F = tela cheia</p>
+  </section>
+
+  <section class="slide">
+    <div class="wrap">
+      <h2>O que é LSP? 🤔</h2>
+      <ul class="list">
+        <li class="reveal">Language Server Protocol — inteligência por linguagem;</li>
+        <li class="reveal">Autocomplete, erros, goto, hover, rename, format;</li>
+        <li class="reveal">No Helix é <b>nativo</b> — sem plugins;</li>
+        <li class="reveal">Configure em <code class='inline'>languages.toml</code>.</li>
+      </ul>
+      
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="wrap">
+      <h2>Mão na massa — 1/4: health check 🏥</h2>
+      <div class="term reveal">
+        <div class="term-bar"><i></i><i></i><i></i><span>terminal</span></div>
+        <pre><code>hx --health python
+hx --health go
+hx --health typescript
+hx --health php
+hx --health sql</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="wrap">
+      <h2>Mão na massa — 2/4: autocomplete 💬</h2>
+      <div class="term reveal">
+        <div class="term-bar"><i></i><i></i><i></i><span>insert mode em .py ou .go</span></div>
+        <pre><code><span class="kw">i</span>          <span class="cm"># insert mode</span>
+<span class="cm"># digite: imp</span>
+<span class="kw">Ctrl-x</span>     <span class="cm"># autocomplete</span>
+<span class="kw">Tab</span>        <span class="cm"># próximo item</span>
+<span class="kw">Enter</span>      <span class="cm"># aceitar</span></code></pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="wrap">
+      <h2>Mão na massa — 3/4: goto e hover 🔍</h2>
+      <div class="term reveal">
+        <div class="term-bar"><i></i><i></i><i></i><span>normal mode</span></div>
+        <pre><code><span class="kw">gd</span>         <span class="cm"># goto definition</span>
+<span class="kw">gr</span>         <span class="cm"># references</span>
+<span class="kw">Space k</span>    <span class="cm"># hover / documentação</span>
+<span class="kw">]d</span> <span class="kw">[d</span>     <span class="cm"># próximo/anterior diagnóstico</span></code></pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="wrap">
+      <h2>Mão na massa — 4/4: rename e code action 🔧</h2>
+      <div class="term reveal">
+        <div class="term-bar"><i></i><i></i><i></i><span>normal mode</span></div>
+        <pre><code><span class="kw">Space r</span>    <span class="cm"># rename symbol</span>
+<span class="kw">Space a</span>    <span class="cm"># code action (quick fix)</span>
+<span class="kw">Space s</span>    <span class="cm"># symbols do documento</span>
+<span class="kw">=</span>          <span class="cm"># formatar seleção</span>
+<span class="kw">F</span>          <span class="cm"># formatar arquivo (custom)</span></code></pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="wrap">
+      <h2>Dicas profissionais 💡</h2>
+      <div class="tip reveal"><b>💡 Comunidade Reddit:</b> use <span class='kbd'>hx --health</span> sempre que LSP falhar — é o primeiro passo.</div>
+      <div class="tip reveal"><b>🔧 :lsp-restart</b> — reinicia language servers sem fechar o editor.</div>
+      <div class="tip reveal"><b>📁 roots:</b> LSP precisa de go.mod, package.json ou pyproject.toml na raiz.</div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="wrap">
+      <h2>Recapitulando 📌</h2>
+      <ul class="list">
+        <li class="reveal">LSP nativo no Helix.</li>
+        <li class="reveal">hx --health para diagnosticar.</li>
+        <li class="reveal">Space k/a/r/s para LSP.</li>
+        <li class="reveal">languages.toml define servidores.</li>
+      </ul>
+      
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="wrap" style="text-align:center">
+      <span class="badge reveal">Próxima aula</span>
+      <h1 class="reveal" style="font-size:clamp(2rem,3.4vw,4rem)">09 — Busca e Substituição</h1>
+      <p class="subtitle reveal">Siga na ordem — cada aula constrói sobre a anterior.</p>
+      <div class="contact">
+        <p class="reveal"><b>Icaro William</b> · Arquiteto de Software</p>
+        <p class="reveal">🐙 <a href="https://github.com/icarojobs/helix-master">github.com/icarojobs/helix-master</a></p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="progress"><i id="bar"></i></div>
+<footer class="brand"><b>Icaro William</b> · Helix Master</footer>
+<nav class="controls">
+  <button id="prev" title="Anterior (←)">◀</button>
+  <span id="counter">1 / 1</span>
+  <button id="next" title="Próximo (→)">▶</button>
+  <button id="fs" title="Tela cheia (F)">⛶</button>
+</nav>
+
+<script>
+/* ============ NÚCLEO DA APRESENTAÇÃO (não altere) ============ */
+const slides=[...document.querySelectorAll('.slide')];
+const bar=document.getElementById('bar'),counter=document.getElementById('counter');
+let idx=Math.max(0,Math.min(slides.length-1,parseInt(location.hash.slice(1))||0));
+
+/* cascata automática dos .reveal */
+slides.forEach(s=>s.querySelectorAll('.reveal').forEach((el,i)=>el.style.setProperty('--i',i)));
+
+function show(n){
+  n=Math.max(0,Math.min(slides.length-1,n));
+  slides[idx].classList.remove('active');
+  idx=n;
+  slides[idx].classList.add('active');
+  history.replaceState(null,'','#'+idx);
+  counter.textContent=(idx+1)+' / '+slides.length;
+  bar.style.width=(slides.length>1?idx/(slides.length-1)*100:100)+'%';
+  typeIfNeeded(slides[idx]);
+}
+
+/* efeito máquina de escrever nos .type (uma vez por slide) */
+function typeIfNeeded(s){
+  s.querySelectorAll('.type:not([data-done])').forEach(el=>{
+    el.dataset.done=1;
+    const chars=Array.from(el.textContent);
+    el.textContent='';el.classList.add('typing');
+    let i=0;
+    (function tick(){
+      if(i<=chars.length){el.textContent=chars.slice(0,i++).join('');setTimeout(tick,26)}
+      else el.classList.remove('typing');
+    })();
+  });
+}
+
+document.getElementById('next').onclick=()=>show(idx+1);
+document.getElementById('prev').onclick=()=>show(idx-1);
+const fsBtn=document.getElementById('fs');
+fsBtn.onclick=()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();
+
+addEventListener('keydown',e=>{
+  if(['ArrowRight','ArrowDown','PageDown',' '].includes(e.key)){e.preventDefault();show(idx+1)}
+  else if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();show(idx-1)}
+  else if(e.key==='Home'){e.preventDefault();show(0)}
+  else if(e.key==='End'){e.preventDefault();show(slides.length-1)}
+  else if(e.key.toLowerCase()==='f')fsBtn.click();
+});
+
+let tx=null;
+addEventListener('touchstart',e=>tx=e.touches[0].clientX,{passive:true});
+addEventListener('touchend',e=>{
+  if(tx==null)return;
+  const dx=e.changedTouches[0].clientX-tx;
+  if(Math.abs(dx)>60)show(idx+(dx<0?1:-1));
+  tx=null;
+},{passive:true});
+
+/* ============ MATRIX RAIN ============ */
+const cv=document.getElementById('matrix'),ctx=cv.getContext('2d');
+let W,H,cols,drops;
+function resize(){W=cv.width=innerWidth;H=cv.height=innerHeight;
+  cols=Math.floor(W/18);drops=Array.from({length:cols},()=>Math.random()*H/18)}
+resize();addEventListener('resize',resize);
+const glyphs='01アイウエオカキクケコサシスセソタチツ<>/{}[]=+*#$_';
+setInterval(()=>{
+  ctx.fillStyle='rgba(7,9,15,.08)';ctx.fillRect(0,0,W,H);
+  ctx.font='15px monospace';
+  ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#00ff9c';
+  for(let i=0;i<cols;i++){
+    ctx.fillText(glyphs[Math.floor(Math.random()*glyphs.length)],i*18,drops[i]*18);
+    if(drops[i]*18>H&&Math.random()>.975)drops[i]=0;
+    drops[i]++;
+  }
+},50);
+
+show(idx);
+</script>
+
+</body>
+</html>
